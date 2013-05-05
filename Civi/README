@@ -1,0 +1,7 @@
+This is very simple and tiny sns based on the framework Flask
+
+
+if you want to destroy all the data 
+please run locolhost/destroy
+the you have to initialize the database
+please run locolhost/init
