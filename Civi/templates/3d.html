@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+{% block including %}
+	<script type=text/javascript src="{{ url_for('static', filename='scenejs.js') }}"></script>
+	<script type=text/javascript src="{{ url_for('static', filename='CGA.js') }}"></script>
+{% endblock %}
+{% block body %}
+	<script>
+	 	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+		$(function() {
+			$('#fetch').click(function() {
+				$.getJSON($SCRIPT_ROOT + '/getEntries', {'uid': $('#uid').val(), 'count': 1}, function(json) {
+					alert(json.status);
+					console.log(json);
+				});
+			});
+		});
+	</script>
+
+	<script type=text/javascript src="{{ url_for('static', filename='models/doorModel.js') }}"></script>
+
+	<input type="text" name="uid" id="uid" val="">
+	<button id="fetch">Fetch</button>
+	<canvas id="theCanvas" width="720" height="720">
+		<p>This example requires a browser that supports the
+			<a href="http://www.w3.org/html/wg/html5/">HTML5</a>
+			&lt;canvas&gt; feature.</p>
+	</canvas>
+
+	<script type="text/javascript">
+		var cga = new clsCGA("theScene", "theCanvas");
+		cga.setModelSrc($SCRIPT_ROOT + '/static/models/');
+
+		cga.addRule('1', '', '', 'T(0,-0.01,0) S(4,0.01,3) I(cube){floor} T(-4,0,0) S(0.1,1,3) Text(brickTexture) I(cube){wall} T(4,0,0) S(0.1,1,3) Text(brickTexture) I(cube){wall} T(-0,0,-3) S(4.1,1,0.1) Text(brickTexture) I(cube){wall} T(0,0,3) S(4.1,1,0.1) Text(brickTexture) I(cube){wall0}','');
+
+		// cga.addRule('2', 'floor', '', 'Subdiv(X,1,1,1){fa|fb|fa}','');
+		// cga.addRule('3', 'fb', '', 'Subdiv(Z,1,1,1){fa|pool|fa}','');
+		cga.addRule('4', 'wall0', '', 'Subdiv(X,2,1,2){wall1|wall2|wall1}','');
+		cga.addRule('5', 'wall2', '', 'Subdiv(Y,3,1){door|wall}','');
+		cga.addRule('41', 'wall1', '', 'Subdiv(X,1,1,1){wall|wall3|wall}','');
+		cga.addRule('42', 'wall3', '', 'Subdiv(Y,1,2,1){wall|window|wall}','');
+		cga.addRule('6', 'floor', '', 'Text(woodTexture)', '');
+		// cga.addRule('7', 'pool', '', 'Text(waterTexture)', '');
+		cga.addRule('8', 'wall', '', 'Text(brickTexture)', '');
+		cga.addRule('9', 'door', '', 'Text(doorTexture)', '');
+		cga.addRule('10', 'window', '', 'Text(windowTexture)', '');
+		//
+		//
+		// cga.addRule('1', '', '', 'T(0,0,0) S(1,2,1) I(cube){root}','');
+		// cga.addRule('2', 'root', '', 'Subdiv(Y,6,2,4,4,4,6,2,4,4,4){ floor | ledge | floor | ledge | floor | floor | ledge | floor | ledge | floor }', '');
+		// // cga.addRule('3', 'floor', '', 'I(sphere)', '');
+		// cga.addRule('4', 'floor', '', 'Subdiv(X,2,3,2,1){ A | B | A | C }', '');
+		// cga.addRule('5', 'B', '', 'I(nil)', '');
+		// cga.addRule('6', 'A', '', 'Subdiv(Z,1,2,3){ AA | AB | AC }', '');
+		// cga.addRule('7', 'AB', '', 'I(disk)', '0.7');
+		// cga.addRule('8', 'C', '', 'I(sphere)', '0.5');
+
+		// cga.buildNodes();
+		cga.buildScene();
+
+		var scene = cga.scene;
+		var yawNode = scene.findNode("yaw");
+		var pitchNode = scene.findNode("mainTranslate");
+
+		/* As mouse drags, we'll update the rotate nodes
+		 */
+
+		var lastX;
+		var lastY;
+		var dragging = false;
+
+		var newInput = false;
+		var yaw = 0;
+		var pitch = 0;
+
+
+		var canvas = document.getElementById("theCanvas");
+
+		function mouseDown(event) {
+				lastX = event.clientX;
+				lastY = event.clientY;
+				dragging = true;
+		}
+
+		function touchStart(event) {
+				lastX = event.targetTouches[0].clientX;
+				lastY = event.targetTouches[0].clientY;
+				dragging = true;
+		}
+
+		function mouseUp() {
+				dragging = false;
+		}
+
+		function touchEnd() {
+				dragging = false;
+		}
+
+		function mouseMove(event) {
+				var posX = event.clientX;
+				var posY = event.clientY;
+				actionMove(posX,posY);
+		}
+
+		function touchMove(event) {
+				var posX = event.targetTouches[0].clientX;
+				var posY = event.targetTouches[0].clientY;
+				actionMove(posX,posY);
+		}
+
+		function actionMove(posX, posY) {
+				if (dragging) {
+
+						yaw += (posX - lastX) * 0.5;
+						pitch -= (posY - lastY) * 0.03;
+
+						lastX = posX;
+						lastY = posY;
+
+						newInput = true;
+
+				}
+		}
+
+		canvas.addEventListener('mousedown', mouseDown, true);
+		canvas.addEventListener('mousemove', mouseMove, true);
+		canvas.addEventListener('mouseup', mouseUp, true);
+		canvas.addEventListener('touchstart', touchStart, true);
+		canvas.addEventListener('touchmove', touchMove, true);
+		canvas.addEventListener('touchend', touchEnd, true);
+
+	setTimeout(function() {
+		cga.renderScene({
+			idleFunc: function() {
+				if (newInput) {
+					yawNode.set("angle", yaw);
+					pitchNode.set("y", pitch);
+					newInput = false;
+				}
+			}
+		});
+	}, 500);
+
+	</script>
+{% endblock %}

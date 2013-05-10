@@ -4,6 +4,9 @@
  * @version 0.1.0
  */
 
+var MODELSRC = "";
+var FUNCQUEUE = [];
+
 /**
  * @class CGA Class
  * @param  {String} sceneId  Scene ID
@@ -12,7 +15,7 @@
 function clsCGA(sceneId, canvasId) {
 	this.rule = {};
 	this.env = {};
-	this.node = new clsNode('root');
+	this.node = [];//new clsNode('root');
 	this.scene = {
 		id: sceneId,
 		canvasId: canvasId,
@@ -59,40 +62,88 @@ function clsCGA(sceneId, canvasId) {
 									},
 
 									{
-										type: "rotate",
-										id: "pitch",
-										angle: 0.0,
-										x : 1.0,
+										type: "translate",
+										id: "mainTranslate",
+										x: 0,
+										y: 0,
+										z: 0,
 
 										nodes: [
 											{
 												type: "rotate",
-												id: "yaw",
-												angle: 0.0,
-												y : 1.0,
+												angle: -90.0,
+												x: 1.0,
 
 												nodes: [
-
-													/* Ambient, diffuse and specular surface properties
-													 */
 													{
 														type: "material",
-														id: "main",
+														id: "ground",
 														emit: 0,
-														baseColor:      { r: 0.5, g: 0.5, b: 0.6 },
+														baseColor:      { r: 0.8, g: 0.8, b: 0.8 },
 														specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
 														specular:       1.0,
 														shine:          50.0,
 
 														nodes: [
-															// {
-															// 	type: "cube",
-															// 	xSize: 2
-															// },
-															// {
-															// 	type: "cube",
-															// 	ySize: 2
-															// }
+															{
+																type: "quad",
+																xSize: 10.0,
+																ySize: 10.0
+															}
+														]
+													}
+												]
+											},
+
+											{
+												type: "rotate",
+												id: "pitch",
+												angle: 0.0,
+												x : 1.0,
+
+												nodes: [
+													{
+														type: "rotate",
+														id: "yaw",
+														angle: 0.0,
+														y : 1.0,
+
+														nodes: [
+
+															/* Ambient, diffuse and specular surface properties
+															 */
+															{
+																type: "material",
+																id: "main",
+																emit: 0,
+																baseColor:      { r: 0.5, g: 0.5, b: 0.6 },
+																specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
+																specular:       1.0,
+																shine:          50.0,
+
+																nodes: [
+																	{
+																		type: 'scale',
+																		x: 0.01,
+																		y: 0.01,
+																		z: 0.01,
+
+																		nodes: [
+																			// doorModel
+																		]
+
+																	},
+
+																	// {
+																	// 	type: "cube",
+																	// 	xSize: 2
+																	// },
+																	// {
+																	// 	type: "cube",
+																	// 	ySize: 2
+																	// }
+																]
+															}
 														]
 													}
 												]
@@ -145,7 +196,7 @@ clsCGA.prototype.addRule = function(id, predecessor, cond, successor, prob) {
 		}
 	}
 	newRule.func = newRule.func || [];
-	var arr = newRule.successor.match(/\S+\([^\s()]+\)(\{.+\})?(?=(\s+|$))/g);
+	var arr = newRule.successor.match(/\S+\([^\s()]+\)(\{[^\}]+\})?(?=(\s+|$))/g);
 	var r;
 
 	arr.forEach(function(e) {
@@ -170,15 +221,27 @@ clsCGA.prototype.addRule = function(id, predecessor, cond, successor, prob) {
 function handleNode(rule, node) {
 	if (Math.random() > parseFloat(rule.prob)) return;
 
-	if (node.raw && node.name == rule.predecessor) {
+	if (rule.predecessor == '') {
+		rule.func.forEach(function(fe, fi) {
+			if (fe[0] == 'I' || fe[0] == 'M') {
+				var newNode = new clsNode(fe[2]);
+				newNode[fe[0]](fe[1]);
+				node.push(newNode);
+			}
+			else {//} if (fe[0] == 'T' || fe[0] == 'S' || fe[0] == 'R') {
+				FUNCQUEUE.push(fe);
+			}
+		});
+	}
+	else if (node.raw && node.name == rule.predecessor) {
 		rule.func.forEach(function(fe, fi) {
 			fe[2] == undefined ? node[fe[0]](fe[1]) : node[fe[0]](fe[1], fe[2]);
 		});
 	}
-	if (node.children.length > 0) {
+	if (node.children != undefined && node.children.length > 0) {
 		node.children.forEach(function(ce, ci) {
 			handleNode(rule, ce);
-		})
+		});
 	}
 };
 
@@ -190,28 +253,58 @@ function handleNode(rule, node) {
  * @param  {String} index     Used to void id clash
  */
 function insertNode(scene, node, sceneNode, index) {
-	var newSceneNode = {
-		type: "translate",
-		x: node.position.translate[0],
-		y: node.position.translate[1],
-		z: node.position.translate[2],
-		nodes: [
-			{
-				type: "scale",
+	var newSceneNode = (node.isModel != undefined) && (node.isModel == true) ?
+		node.entity : {
+			id: node.name + '_' + index,
+			type: node.entity,
+			nodes: []
+		};
 
-				x: node.position.scale[0],
-				y: node.position.scale[1],
-				z: node.position.scale[2],
-				nodes: [
-					{
-						id: node.name + '_' + index,
-						type: node.entity,
-						nodes: []
-					}
-				]
-			}
-		]
+	if (node.attribute.texture != null) {
+		// var tmpSceneNode = newSceneNode;
+		// newSceneNode = eval(node.attribute.texture);
+		node.attribute.texture.nodes[0].nodes.push(newSceneNode);
+		newSceneNode = node.attribute.texture;
 	}
+
+	if (node.attribute.scale.toString() != [1, 1, 1].toString()) {
+		newSceneNode = {
+			type: "scale",
+			x: node.attribute.scale[0],
+			y: node.attribute.scale[1],
+			z: node.attribute.scale[2],
+
+			nodes: [
+				newSceneNode
+			]
+		}
+	}
+	if (node.attribute.rotate[1] != 0) {
+		newSceneNode = {
+			type: "rotate",
+			angle: node.attribute.rotate[1],
+
+			nodes: [
+				newSceneNode
+			]
+		}
+		newSceneNode[['x', 'y', 'z'][node.attribute.rotate[0]]] = 1.0;
+	}
+	if (node.attribute.translate.toString() != [0, 0, 0].toString()) {
+		newSceneNode = {
+			type: "translate",
+			x: node.attribute.translate[0],
+			y: node.attribute.translate[1],
+			z: node.attribute.translate[2],
+
+			nodes: [
+				newSceneNode
+			]
+		}
+	}
+
+	// tmpNodes = entityNode[Number((node.isModel != undefined) && (node.isModel == true))];
+
 	sceneNode.add("node", newSceneNode);
 	if (node.children.length > 0) {
 		var lastNode = scene.findNode(node.name + '_' + index);
@@ -226,7 +319,15 @@ function insertNode(scene, node, sceneNode, index) {
  */
 clsCGA.prototype.buildNodes = function() {
 	for(var i in this.rule) {
-		handleNode(this.rule[i], this.node);
+		if (this.rule[i].predecessor == '') {
+			handleNode(this.rule[i], this.node);
+		}
+		else {
+			var that = this;
+			this.node.forEach(function(e) {
+				handleNode(that.rule[i], e);
+			});
+		}
 	}
 };
 
@@ -234,6 +335,8 @@ clsCGA.prototype.buildNodes = function() {
  * Create scene, and save scene handler
  */
 clsCGA.prototype.buildScene = function() {
+	this.buildNodes();
+
 	SceneJS.createScene(this.scene);
 	this.scene = SceneJS.scene(this.scene.id);
 };
@@ -244,8 +347,19 @@ clsCGA.prototype.buildScene = function() {
  */
 clsCGA.prototype.renderScene = function(func) {
 	this.scene.start(func);
-	insertNode(this.scene, this.node, this.scene.findNode('main'), 0);
+	var mainSceneNode = this.scene.findNode('main');
+	this.node.forEach(function(e, i) {
+		insertNode(this.scene, e, mainSceneNode, i);
+	});
 };
+
+/**
+ * Set src of models to be loaded
+ * @param {String} src src of models
+ */
+clsCGA.prototype.setModelSrc = function(src) {
+	MODELSRC = src;
+}
 
 /**
  * @class Node Class
@@ -256,11 +370,12 @@ function clsNode(name) {
 	this.children = [];
 	this.entity = null;
 	this.raw = true;
-	this.position = {
+	this.attribute = {
 		'translate': [0, 0, 0],
-		'scale': [1, 1, 1]
+		'scale': [1, 1, 1],
+		'rotate': [0, 0],
+		'texture': null
 	};
-	this.attributes = {};
 }
 
 /**
@@ -273,8 +388,27 @@ clsNode.prototype.T = function(args) {
 		argsArr[i] = parseFloat(argsArr[i]);
 	};
 
-	this.position.translate = argsArr;
+	this.attribute.translate = argsArr;
 };
+
+/**
+ * Rotate function
+ * @param {String} args Rotate arguments
+ */
+clsNode.prototype.R = function(args) {
+	var argsArr = args.split(/\s*,\s*/);
+
+	this.attribute.rotate = [getAxis(argsArr[0]), parseFloat(argsArr[1])];
+};
+
+
+clsNode.prototype.Text = function(args) {
+	var that = this;
+
+	loadScript(MODELSRC + args + '.js', function() {
+		that.attribute.texture = eval(args);
+	});
+}
 
 /**
  * Scale function
@@ -286,7 +420,8 @@ clsNode.prototype.S = function(args) {
 		argsArr[i] = parseFloat(argsArr[i]);
 	};
 
-	this.position.scale = argsArr;
+	this.attribute.scale = argsArr;
+	this.attribute.translate[1] += argsArr[1];
 };
 
 /**
@@ -294,8 +429,31 @@ clsNode.prototype.S = function(args) {
  * @param {String} args Identity name
  */
 clsNode.prototype.I = function(args) {
+	var f = null;
 	this.entity = args;
+	while (f = FUNCQUEUE.shift()) {
+		this[f[0]](f[1]);
+	}
 };
+
+/**
+ * Model function
+ * @param {String} args Model name
+ */
+clsNode.prototype.M = function(args) {
+	var f = null;
+	this.entity = args;
+	while (f = FUNCQUEUE.shift()) {
+		this[f[0]](f[1]);
+	}
+	this.isModel = true;
+
+	var head = document.getElementsByTagName('head').item(0);
+	var script = document.createElement('script');
+	// script.setAttribute('type', 'text/javascript');
+	script.setAttribute('src', MODELSRC + args + '.js');
+	head.appendChild(script);
+}
 
 /**
  * Sub-divide function
@@ -317,12 +475,12 @@ clsNode.prototype.Subdiv = function(args, names) {
 	namesArr.forEach(function(e, i) {
 		newNode = new clsNode(e);
 		newNode.entity = that.entity;
-		newNode.position.translate[axis] = (offset * 2 + argsArr[i] - sum) / sum * that.position.scale[axis];
-		newNode.position.scale[axis] = argsArr[i] / sum * that.position.scale[axis];
+		newNode.attribute.scale[axis] = argsArr[i] / sum * that.attribute.scale[axis];
+		newNode.attribute.translate[axis] = (offset * 2 + argsArr[i] - sum) / sum * that.attribute.scale[axis];
 		that.children.push(newNode);
 		offset += argsArr[i];
 	});
-	that.position.scale[axis] = 1;
+	that.attribute.scale[axis] = 1;
 	that.entity = 'layer';
 	that.raw = false;
 };
@@ -351,6 +509,40 @@ function getTypeof(a) {
 	var r = a.constructor.toString().match(/function\s(\w+)\(\).+/);
 	return r[1];
 }
+
+function loadScript(url, callback) {
+	var script = document.createElement("Script");
+	script.type = "text/javascript";
+
+	//IE 验证脚本是否下载完成
+	if (script.readyState) {
+		script.onreadystatechange = function() {
+			//readyState属性有5种取值
+			//uninitialized：初始状态
+			//loading：开始下载
+			//interactive：数据完成下载但尚不可用
+			//complete：数据已经准备就绪
+			//实际使用时，readyState的值并不像我们预想的那样有规律，实践发现使用readyState
+			//最靠谱的方式是同时检查以下2个状态，只要其中1个触发，就认为脚本下载完成。
+			if (script.readyState == "loaded" || script.readyState == "complete") {
+				//移除事件处理器，确保事件不会处理2次
+				script.onreadystatechange = null;
+				callback();
+			}
+		}
+	}
+
+	//其他浏览器
+	else {
+		script.onload = function() {
+			callback();
+		};
+	}
+
+	script.src = url;
+	//把新建的<Script>添加到<head>里比添加到<body>里更保险。
+	document.getElementsByTagName("head")[0].appendChild(script);
+	}
 
 /**
  * Clone array

@@ -3,8 +3,9 @@
 from __future__ import with_statement
 from contextlib import closing
 import sqlite3
+import json
 from flask import Flask,request,session,g,redirect,url_for,abort,\
-     render_template,flash
+     render_template,flash,jsonify
 
 
 #------------civi--------------
@@ -64,6 +65,24 @@ def show_entries():
         entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
     return render_template('show_entries.html',entries=entries)
 
+@app.route('/3d')
+def webgl():
+    return render_template('3d.html')
+
+@app.route('/getEntries', methods = ['GET'])
+def get_entry():
+    username = session['User']
+    # uid = request.form['uid'] or getUserId(username)
+    # count = request.form['count'] or 1
+    uid = request.args.get('uid', type=int) or getUserId(username)
+    count = request.args.get('count', type=int) or 1
+    cur = g.db.execute('select * from entries where userId = ? limit 0, ?', [uid, count])
+    entries = [dict(id = row[0], title = row[1], text = row[2]) for row in cur.fetchall()]
+    if len(entries) > 0:
+        return jsonify(entries = entries, status = True, uid = uid, count = count)
+    else:
+        return jsonify(status = False, uid = uid, count = count)
+
 @app.route('/add',methods=['POST'])
 def add_entry():
     username = session['User']
@@ -120,9 +139,9 @@ def login():
         username = request.form['username']
         password = request.form['password']
         sel = g.db.execute('select * from users where username == ?',[username])
-        entries = [dict(id = row[0],name = row[1], pwd = row[2]) for row in sel.fetchall()] 
+        entries = [dict(id = row[0],name = row[1], pwd = row[2]) for row in sel.fetchall()]
         if len(entries) > 0:
-            passd = unicode(entries[0]['pwd']) 
+            passd = unicode(entries[0]['pwd'])
             if (passd == password):
                 session['User'] = username
                 flash('You were logged in')
@@ -132,9 +151,9 @@ def login():
         else:
             flash('We do not have such a user')
     return render_template('login.html',error = error)
-    
 
-    
+
+
 @app.route('/deleteEntry',methods=['POST'])
 def deleteEntry():
     g.db.execute('delete from entries where id = (?)',[request.form['entryId']])
@@ -142,15 +161,15 @@ def deleteEntry():
     flash('New entry was successfully deleted')
     return redirect(url_for('show_entries'))
 
-    
+
 @app.route('/logout')
 def logout():
     session.pop('User', None)
     flash('You were logged out')
     return render_template('logout.html')
 
-    
+
 if __name__=='__main__':
     app.debug = True
     app.run()
-    
+
