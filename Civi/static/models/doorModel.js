@@ -1,5 +1,5 @@
 var doorModel = {
-    type: 'layer',
+    type: 'node',
     nodes: [
         {
             type: 'library',
@@ -199,12 +199,12 @@ var doorModel = {
                     depth: true,
                     stencil: false,
                 },
-            clearColor:
-                {
-                    r: 0.9,
-                    b: 0.9,
-                    g: 0.9,
-                },
+            // clearColor:
+            //     {
+            //         r: 0.9,
+            //         b: 0.9,
+            //         g: 0.9,
+            //     },
             nodes: [
                 {
                     type: 'matrix',

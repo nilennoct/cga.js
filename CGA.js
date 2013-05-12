@@ -50,15 +50,31 @@ function clsCGA(sceneId, canvasId) {
 
 								nodes: [
 
-									/* Point lights
-									 */
 									{
 										type: "light",
 										mode: "dir",
-										color: { r: 1.0, g: 1.0, b: 1.0 },
+										color: { r: 0.5, g: 0.5, b: 0.5 },
+										diffuse: true,
+										specular: true,
+										dir: { x: 0.0, y: -0.5, z: 0.0 }
+									},
+
+									{
+										type: "light",
+										mode: "dir",
+										color: { r: 0.6, g: 0.6, b: 0.6 },
 										diffuse: true,
 										specular: true,
 										dir: { x: 1.0, y: -0.5, z: -1.0 }
+									},
+
+									{
+										type: "light",
+										mode: "dir",
+										color: { r: 0.6, g: 0.6, b: 0.6 },
+										diffuse: true,
+										specular: true,
+										dir: { x: -1.0, y: -0.5, z: -1.0 }
 									},
 
 									{
@@ -79,10 +95,10 @@ function clsCGA(sceneId, canvasId) {
 														type: "material",
 														id: "ground",
 														emit: 0,
-														baseColor:      { r: 0.8, g: 0.8, b: 0.8 },
+														baseColor:      { r: 0.9, g: 0.9, b: 0.9 },
 														specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
 														specular:       1.0,
-														shine:          50.0,
+														shine:          70.0,
 
 														nodes: [
 															{
@@ -124,12 +140,13 @@ function clsCGA(sceneId, canvasId) {
 																nodes: [
 																	{
 																		type: 'scale',
-																		x: 0.01,
-																		y: 0.01,
-																		z: 0.01,
+																		x: 0.1,
+																		y: 0.1,
+																		z: 0.1,
 
 																		nodes: [
-																			// doorModel
+																			// tankJSON
+																			// windowModel
 																		]
 
 																	},
@@ -265,6 +282,7 @@ function insertNode(scene, node, sceneNode, index) {
 		// newSceneNode = eval(node.attribute.texture);
 		node.attribute.texture.nodes[0].nodes.push(newSceneNode);
 		newSceneNode = node.attribute.texture;
+		newSceneNode.nodes[0].layers[0].scale = getTextureScale(node.attribute.scale);
 	}
 
 	if (node.attribute.scale.toString() != [1, 1, 1].toString()) {
@@ -442,17 +460,15 @@ clsNode.prototype.I = function(args) {
  */
 clsNode.prototype.M = function(args) {
 	var f = null;
-	this.entity = args;
+	var that = this;
 	while (f = FUNCQUEUE.shift()) {
 		this[f[0]](f[1]);
 	}
-	this.isModel = true;
 
-	var head = document.getElementsByTagName('head').item(0);
-	var script = document.createElement('script');
-	// script.setAttribute('type', 'text/javascript');
-	script.setAttribute('src', MODELSRC + args + '.js');
-	head.appendChild(script);
+	loadScript(MODELSRC + args + '.js', function() {
+		that.entity = eval(args);
+		that.isModel = true;
+	});
 }
 
 /**
@@ -461,6 +477,11 @@ clsNode.prototype.M = function(args) {
  * @param {String} names Name of each part
  */
 clsNode.prototype.Subdiv = function(args, names) {
+	if (this.isModel != undefined && this.isModel) {
+		that.raw = false;
+		return;
+	}
+
 	var that = this;
 	var argsArr = args.split(/\s*,\s*/);
 	var namesArr = names.trim().split(/\s*\|\s*/);
@@ -508,6 +529,30 @@ function getAxis(a) {
 function getTypeof(a) {
 	var r = a.constructor.toString().match(/function\s(\w+)\(\).+/);
 	return r[1];
+}
+
+function getTextureScale(scale) {
+	if (scale[2] <= 1) {
+		return {
+			x: scale[0],
+			y: scale[1],
+			z: 1
+		};
+	}
+	else if (scale[0] <= scale[1] && scale[0] <= scale[2]) {
+		return {
+			x: scale[2],
+			y: scale[1],
+			z: 1
+		};
+	}
+	else {
+		return {
+			x: scale[0],
+			y: scale[2],
+			z: 1
+		};
+	}
 }
 
 function loadScript(url, callback) {
