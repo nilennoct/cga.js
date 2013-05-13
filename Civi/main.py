@@ -42,6 +42,11 @@ def getUserId(username):
     entries = [dict(id = row[0],name = row[1],pwd = row[2]) for row in cur.fetchall()]
     return entries[0]['id']
 
+def getUsername(uid):
+    cur = g.db.execute('select * from users where id == ?',[uid])
+    entries = [dict(id = row[0],username = row[1],pwd = row[2]) for row in cur.fetchall()]
+    return entries[0]['username']
+
 @app.before_request
 def before_request():
     """Make sure we are connected to the database each request."""
@@ -67,21 +72,56 @@ def show_entries():
 
 @app.route('/3d')
 def webgl():
-    return render_template('3d.html')
+    username = session.get('User')
+    if username == None:
+        flash('Please Log in first!')
+        entries = []
+        return render_template('login.html')
+    else:
+        uid = request.args.get('uid', type=int) or getUserId(username)
+        uname = getUsername(uid)
+        cur = g.db.execute('select id,title,text from entries where userId == ? order by id desc limit 0, 1', [uid])
+        entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
+        if len(entries) == 0:
+            entries = [dict(id = 0, title = "-", text = "[No Entry>_<]")]
+        return render_template('3d.html', entry=entries[0], uid=uid, username=uname)
 
 @app.route('/getEntries', methods = ['GET'])
+def get_entries():
+    username = session['User']
+    if username == None:
+        return jsonify(status = False)
+    else:
+        # uid = request.form['uid'] or getUserId(username)
+        # count = request.form['count'] or 1
+        uid = request.args.get('uid', type=int) or getUserId(username)
+        count = request.args.get('count', type=int) or 1
+        method = request.args.get('method', None)
+        cur = g.db.execute('select id,title,text from entries where userId = ? limit 0, ?', [uid, count])
+        entries = [dict(id = row[0], title = row[1], text = row[2]) for row in cur.fetchall()]
+        if len(entries) > 0:
+            return jsonify(entries = entries, status = True, uid = uid, count = count)
+        else:
+            return jsonify(status = False, uid = uid, count = count)
+
+@app.route('/getEntry', methods = ['GET'])
 def get_entry():
     username = session['User']
-    # uid = request.form['uid'] or getUserId(username)
-    # count = request.form['count'] or 1
-    uid = request.args.get('uid', type=int) or getUserId(username)
-    count = request.args.get('count', type=int) or 1
-    cur = g.db.execute('select * from entries where userId = ? limit 0, ?', [uid, count])
-    entries = [dict(id = row[0], title = row[1], text = row[2]) for row in cur.fetchall()]
-    if len(entries) > 0:
-        return jsonify(entries = entries, status = True, uid = uid, count = count)
+    if username == None:
+        return jsonify(status = False)
     else:
-        return jsonify(status = False, uid = uid, count = count)
+        uid = request.args.get('uid', type=int) or getUserId(username)
+        sid = request.args.get('sid', 0, type=int)
+        method = request.args.get('method', "next")
+        if method == "next":
+            cur = g.db.execute('select id,title,text from entries where userId = ? and id < ? limit 0, 1', [uid, sid])
+        else:
+            cur = g.db.execute('select id,title,text from entries where userId = ? and id > ? limit 0, 1', [uid, sid])
+        entries = [dict(id = row[0], title = row[1], text = row[2]) for row in cur.fetchall()]
+        if len(entries) > 0:
+            return jsonify(entry = entries[0], status = True)
+        else:
+            return jsonify(status = False)
 
 @app.route('/add',methods=['POST'])
 def add_entry():
