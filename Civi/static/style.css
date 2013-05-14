@@ -6,7 +6,7 @@ h1              { border-bottom: 2px solid #eee; }
 h2              { font-size: 1.2em; }
 
 .page           { margin: 0 auto; width: 730px; border: 5px solid #ad9b85;
-                  padding: 30px; background: white; margin-top:60px;position: relative;}
+                  padding: 30px; background: white; margin-top:40px;}
 .entries        { list-style: none; margin: 0; padding: 0; }
 .entries li     { margin: 0.8em 1.2em; }
 .entries li h2  { margin-left: -1em; }
@@ -22,6 +22,8 @@ h2              { font-size: 1.2em; }
 	clear: both;
 	display: block;
 }
+
+.homepage 		{width: 700px; height: 150px; padding: 10px; background-color: #eee}
 
 #userLabel {
 	position: absolute;

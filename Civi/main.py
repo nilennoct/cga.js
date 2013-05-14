@@ -90,13 +90,13 @@ def webgl():
         return render_template('login.html')
     else:
         uid = request.args.get('uid', type=int) or getUserId(username)
-		uname = getUserName(uid)
+        uname = getUserName(uid)
 
-		cur = g.db.execute('select id,title,text from entries where userId == ? order by id desc limit 0, 1', [uid])
-        entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
-        if len(entries) == 0:
-            entries = [dict(id = 0, title = "-", text = "[No Entry>_<]")]
-        return render_template('3d.html', entry=entries[0], uid=uid, username=uname)
+    cur = g.db.execute('select id,title,text from entries where userId == ? order by id desc limit 0, 1', [uid])
+    entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
+    if len(entries) == 0:
+        entries = [dict(id = 0, title = "-", text = "[No Entry>_<]")]
+    return render_template('3d.html', entry=entries[0], uid=uid, username=uname)
 
 @app.route('/homepage',methods = ['GET'])
 def homepage():
