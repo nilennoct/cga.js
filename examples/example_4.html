@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>CGA.test()</title>
+	<script type="text/javascript" src="../CGA.js"></script>
+	<script type="text/javascript" src="../scenejs.js"></script>
+</head>
+<body>
+	<canvas id="theCanvas" width="640" height="640">
+		<p>This example requires a browser that supports the
+			<a href="http://www.w3.org/html/wg/html5/">HTML5</a>
+			&lt;canvas&gt; feature.</p>
+	</canvas>
+
+	<script type="text/javascript">
+		var cga = new clsCGA("theScene", "theCanvas");
+		cga.setModelSrc('models/');
+
+		cga.addRule('I', '', '', 'S(2,3,2) I(cube){house} T(0,-0.5,2.5) S(0.5,0.5,0.5) M(male){male}','');
+		cga.addRule('H', 'house', '', 'Subdiv(Y,4,0.5,3,0.5,3,0.5){ ground | ledge | floor | ledge | floor | ledge}', '');
+		cga.addRule('G-1', 'ground', '', 'Subdiv(X,3,1,3){ground0 | ground1 | ground0}', '');
+		cga.addRule('G-2', 'ground1', '', 'Subdiv(Y,1,1){door | wall}', '');
+		cga.addRule('G-3', 'ground0', '', 'Subdiv(X,1,1,1){wall | ground01 | wall}', '0.8');
+		cga.addRule('G-3-1', 'ground0', '', 'Subdiv(X,1){wall}', '');
+		cga.addRule('G-4', 'ground01', '', 'Subdiv(Y,1,1,1){wall | window | wall}', '');
+
+		cga.addRule('F-0', 'floor', '', 'R(Y,90)', '0.7');
+		cga.addRule('F-1', 'floor', '', 'Subdiv(X,1,1){floor0 | floor0}', '');
+		cga.addRule('F-2', 'floor0', '', 'Subdiv(X,1,1,1){wall | floor01 | wall}', '0.9');
+		cga.addRule('F-2-1', 'floor0', '', 'Subdiv(X,1){wall}', '');
+		cga.addRule('F-3', 'floor01', '', 'Subdiv(Y,1,1,1){wall | window | wall}', '');
+
+		cga.addRule('L-1', 'ledge', '', 'Subdiv(X,1){wall}', '');
+
+		cga.addRule('T-1', 'wall', '', 'Text(brick,1)', '');
+		cga.addRule('T-2', 'door', '', 'Text(door,0)', '');
+		cga.addRule('T-3', 'window', '', 'Text(window,0)', '');
+
+		cga.buildScene();
+
+		var scene = cga.scene;
+		var yawNode = scene.findNode("yaw");
+		var pitchNode = scene.findNode("mainTranslate");
+
+		var lastX;
+		var lastY;
+		var dragging = false;
+
+		var newInput = false;
+		var yaw = 0;
+		var pitch = 0;
+
+
+		var canvas = document.getElementById("theCanvas");
+
+		function mouseDown(event) {
+		    lastX = event.clientX;
+		    lastY = event.clientY;
+		    dragging = true;
+		}
+
+		function touchStart(event) {
+		    lastX = event.targetTouches[0].clientX;
+		    lastY = event.targetTouches[0].clientY;
+		    dragging = true;
+		}
+
+		function mouseUp() {
+		    dragging = false;
+		}
+
+		function touchEnd() {
+		    dragging = false;
+		}
+
+		function mouseMove(event) {
+		    var posX = event.clientX;
+		    var posY = event.clientY;
+		    actionMove(posX,posY);
+		}
+
+		function touchMove(event) {
+		    var posX = event.targetTouches[0].clientX;
+		    var posY = event.targetTouches[0].clientY;
+		    actionMove(posX,posY);
+		}
+
+		function actionMove(posX, posY) {
+		    if (dragging) {
+
+		        yaw += (posX - lastX) * 0.5;
+		        pitch -= (posY - lastY) * 0.03;
+
+		        lastX = posX;
+		        lastY = posY;
+
+		        newInput = true;
+
+		    }
+		}
+
+		canvas.addEventListener('mousedown', mouseDown, true);
+		canvas.addEventListener('mousemove', mouseMove, true);
+		canvas.addEventListener('mouseup', mouseUp, true);
+		canvas.addEventListener('touchstart', touchStart, true);
+		canvas.addEventListener('touchmove', touchMove, true);
+		canvas.addEventListener('touchend', touchEnd, true);
+
+		setTimeout(function() {
+			cga.renderScene({
+				idleFunc: function() {
+					if (newInput) {
+						yawNode.set("angle", yaw);
+						pitchNode.set("y", pitch);
+						newInput = false;
+					}
+				}
+			});
+		}, 2000);
+	</script>
+</body>
+</html>

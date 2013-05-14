@@ -4,6 +4,29 @@
 	<script type=text/javascript src="{{ url_for('static', filename='CGA.js') }}"></script>
 {% endblock %}
 {% block body %}
+	<id id="userLabel">
+		{{ username }} 的房间
+	</id>
+
+	<id id="sceneBox">
+		<div id="statusBox">
+			<input type="hidden" name="uid" id="uid" value="{{ uid }}" />
+			<input type="hidden" name="sid" id="sid" value="{{ entry.id }}" />
+			<div id="statusText">{{ entry.text }}</div>
+			<ul id="statusControl">
+				<a href="javascript:fetchEntry('prev');"><li>Prev</li></a>
+				<a href="javascript:fetchEntry('next');"><li>Next</li></a>
+			</ul>
+		</div>
+		<canvas id="theCanvas" width="720" height="720">
+			<p>This example requires a browser that supports the
+				<a href="http://www.w3.org/html/wg/html5/">HTML5</a>
+				&lt;canvas&gt; feature.</p>
+		</canvas>
+	</id>
+
+	<div class="clearfix"></div>
+
 	<script>
 		var statusBox;
 		var statusBoxTop;
@@ -33,37 +56,7 @@
 				}
 			});
 		}
-	</script>
 
-	<script type=text/javascript src="{{ url_for('static', filename='models/tron-tank-model.js') }}"></script>
-	<script type=text/javascript src="{{ url_for('static', filename='models/Window.js') }}"></script>
-
-	<id id="userLabel">
-		{{ username }} 的房间
-	</id>
-
-	<id id="sceneBox">
-		<div id="statusBox">
-			<input type="hidden" name="uid" id="uid" value="{{ uid }}" />
-			<input type="hidden" name="sid" id="sid" value="{{ entry.id }}" />
-			<div id="statusText">{{ entry.text }}</div>
-			<ul id="statusControl">
-				<a href="javascript:fetchEntry('prev');"><li>Prev</li></a>
-				<a href="javascript:fetchEntry('next');"><li>Next</li></a>
-			</ul>
-		</div>
-		<canvas id="theCanvas" width="720" height="720">
-			<p>This example requires a browser that supports the
-				<a href="http://www.w3.org/html/wg/html5/">HTML5</a>
-				&lt;canvas&gt; feature.</p>
-		</canvas>
-	</id>
-
-	<div class="clearfix"></div>
-	<!-- <input type="text" name="uid" id="uid" val="">
-	<button id="fetch">Fetch</button> -->
-
-	<script type="text/javascript">
 		var cga = new clsCGA("theScene", "theCanvas");
 		cga.setModelSrc($SCRIPT_ROOT + '/static/models/');
 

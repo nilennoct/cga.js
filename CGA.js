@@ -1,7 +1,7 @@
 /**
  * @fileOverview CGA
  * @author Neo He
- * @version 0.1.0
+ * @version 1.0.0
  */
 
 var MODELSRC = "";
@@ -9,20 +9,20 @@ var FUNCQUEUE = [];
 
 /**
  * @class CGA Class
- * @param  {String} sceneId  Scene ID
- * @param  {String} canvasId Canvas ID
+ * @param  {String} sceneId  	Scene ID
+ * @param  {String} canvasId 	Canvas ID
  */
 function clsCGA(sceneId, canvasId) {
 	this.rule = {};
 	this.env = {};
-	this.node = [];//new clsNode('root');
+	this.node = [];
 	this.scene = {
 		id: sceneId,
 		canvasId: canvasId,
 		nodes: [
 			{
 				type: "lookAt",
-				eye : { x: 0.0, y: 15.0, z: 15 },
+				eye : { x: 0.0, y: 10.0, z: 15.0 },
 				look : { y:1.0 },
 				up : { y: 1.0 },
 				nodes: [
@@ -37,9 +37,6 @@ function clsCGA(sceneId, canvasId) {
 							far : 300.0
 						},
 						nodes: [
-
-						/* Renderer node to set BG colour
-						 */
 							{
 								type: "renderer",
 								// clearColor: { r: 0.3, g: 0.3, b: 0.6 },
@@ -95,7 +92,7 @@ function clsCGA(sceneId, canvasId) {
 														type: "material",
 														id: "ground",
 														emit: 0,
-														baseColor:      { r: 0.9, g: 0.9, b: 0.9 },
+														baseColor:      { r: 0.6, g: 0.6, b: 0.6 },
 														specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
 														specular:       1.0,
 														shine:          70.0,
@@ -125,14 +122,11 @@ function clsCGA(sceneId, canvasId) {
 														y : 1.0,
 
 														nodes: [
-
-															/* Ambient, diffuse and specular surface properties
-															 */
 															{
 																type: "material",
 																id: "main",
 																emit: 0,
-																baseColor:      { r: 0.5, g: 0.5, b: 0.6 },
+																baseColor:      { r: 1.0, g: 1.0, b: 1.0 },
 																specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
 																specular:       1.0,
 																shine:          50.0,
@@ -144,21 +138,8 @@ function clsCGA(sceneId, canvasId) {
 																		y: 0.1,
 																		z: 0.1,
 
-																		nodes: [
-																			// tankJSON
-																			// windowModel
-																		]
-
+																		nodes: []
 																	},
-
-																	// {
-																	// 	type: "cube",
-																	// 	xSize: 2
-																	// },
-																	// {
-																	// 	type: "cube",
-																	// 	ySize: 2
-																	// }
 																]
 															}
 														]
@@ -179,11 +160,11 @@ function clsCGA(sceneId, canvasId) {
 
 /**
  * Add a rule
- * @param {String|Arrary|Object} id          Rule's ID
+ * @param {String|Arrary|Object} id		Rule's ID
  * @param {String} predecessor
- * @param {String} cond        Condition
+ * @param {String} cond        			Condition
  * @param {String} successor
- * @param {String} prob        Probability
+ * @param {String} prob					Probability
  */
 clsCGA.prototype.addRule = function(id, predecessor, cond, successor, prob) {
 	var type = getTypeof(id);
@@ -241,11 +222,11 @@ function handleNode(rule, node) {
 	if (rule.predecessor == '') {
 		rule.func.forEach(function(fe, fi) {
 			if (fe[0] == 'I' || fe[0] == 'M') {
-				var newNode = new clsNode(fe[2]);
+				var newNode = new clsNode(fe[2], true);
 				newNode[fe[0]](fe[1]);
 				node.push(newNode);
 			}
-			else {//} if (fe[0] == 'T' || fe[0] == 'S' || fe[0] == 'R') {
+			else {
 				FUNCQUEUE.push(fe);
 			}
 		});
@@ -264,10 +245,11 @@ function handleNode(rule, node) {
 
 /**
  * Insert a node into the scene
- * @param  {Scene} scene     Scene to insert node
- * @param  {clsNode} node      Node to be inserted
- * @param  {SceneNode} sceneNode Parent scene node, where a new child node will be inserted
- * @param  {String} index     Used to void id clash
+ * @param  {Scene} scene     		Scene to insert node
+ * @param  {clsNode} node      		Node to be inserted
+ * @param  {SceneNode} sceneNode 	Parent scene node, where a new child node will be inserted
+ * @param  {String} index     		Used to void id clash
+ * @param  {Object} pAttribute		Attribute from ancestors
  */
 function insertNode(scene, node, sceneNode, index, pAttribute) {
 	var newSceneNode = (node.isModel != undefined) && (node.isModel == true) ?
@@ -285,15 +267,9 @@ function insertNode(scene, node, sceneNode, index, pAttribute) {
 				cScale[i] = pAttribute.scale[i];
 			}
 
-			// if (pAttribute.translate[i] != 0.0 && cTranslate[i] == 0.0) {
 			cTranslate[i] += pAttribute.translate[i];
-			// }
 		};
 	}
-
-	// console.log(node.name);
-	// console.log(node.attribute.translate);
-	// console.log(node.attribute.scale);
 
 	if (node.attribute.texture != null) {
 		node.attribute.texture.nodes[0].nodes.push(newSceneNode);
@@ -302,8 +278,6 @@ function insertNode(scene, node, sceneNode, index, pAttribute) {
 			newSceneNode.nodes[0].layers[0].scale = getTextureScale(cScale);
 			newSceneNode.nodes[0].layers[0].translate = getTextureTranslate(cTranslate);
 		}
-		// console.log(newSceneNode.nodes[0].layers[0].translate);
-		// console.log(newSceneNode.nodes[0].layers[0].scale);
 	}
 
 	if (node.attribute.scale.toString() != [1, 1, 1].toString()) {
@@ -341,8 +315,6 @@ function insertNode(scene, node, sceneNode, index, pAttribute) {
 			]
 		}
 	}
-
-	// tmpNodes = entityNode[Number((node.isModel != undefined) && (node.isModel == true))];
 
 	sceneNode.add("node", newSceneNode);
 	if (node.children.length > 0) {
@@ -382,7 +354,7 @@ clsCGA.prototype.buildScene = function() {
 
 /**
  * Render scene, insert all node into scene
- * @param  {Object} func Functions to be called in start()
+ * @param  {Object} func		Functions to be called in start()
  */
 clsCGA.prototype.renderScene = function(func) {
 	this.scene.start(func);
@@ -394,7 +366,7 @@ clsCGA.prototype.renderScene = function(func) {
 
 /**
  * Set src of models to be loaded
- * @param {String} src src of models
+ * @param {String} src			Src of models
  */
 clsCGA.prototype.setModelSrc = function(src) {
 	MODELSRC = src;
@@ -402,13 +374,14 @@ clsCGA.prototype.setModelSrc = function(src) {
 
 /**
  * @class Node Class
- * @param  {String} name
+ * @param  {String} name		Node's name
  */
-function clsNode(name) {
+function clsNode(name, isRoot) {
 	this.name = name;
 	this.children = [];
 	this.entity = null;
 	this.raw = true;
+	this.isRoot = (isRoot != undefined);
 	this.attribute = {
 		'translate': [0, 0, 0],
 		'scale': [1, 1, 1],
@@ -419,20 +392,20 @@ function clsNode(name) {
 
 /**
  * Translate function
- * @param {String} args Translate arguments
+ * @param {String} args			"x,y,z"
  */
 clsNode.prototype.T = function(args) {
 	var argsArr = args.split(/\s*,\s*/);
 	for (var i = argsArr.length - 1; i >= 0; i--) {
-		argsArr[i] = parseFloat(argsArr[i]);
+		this.attribute.translate[i] += parseFloat(argsArr[i]);
 	};
 
-	this.attribute.translate = argsArr;
+	// this.attribute.translate = argsArr;
 };
 
 /**
  * Rotate function
- * @param {String} args Rotate arguments
+ * @param {String} args			"axis,angle"
  */
 clsNode.prototype.R = function(args) {
 	var argsArr = args.split(/\s*,\s*/);
@@ -440,7 +413,10 @@ clsNode.prototype.R = function(args) {
 	this.attribute.rotate = [getAxis(argsArr[0]), parseFloat(argsArr[1])];
 };
 
-
+/**
+ * Set entity's texture
+ * @param  {String} args 		"textureName,isNeedFillFull"
+ */
 clsNode.prototype.Text = function(args) {
 	var that = this;
 	var argsArr = args.split(/\s*,\s*/);
@@ -453,21 +429,21 @@ clsNode.prototype.Text = function(args) {
 
 /**
  * Scale function
- * @param {String} args Scale arguments
+ * @param {String} args			"x,y,z"
  */
 clsNode.prototype.S = function(args) {
 	var argsArr = args.split(/\s*,\s*/);
 	for (var i = argsArr.length - 1; i >= 0; i--) {
-		argsArr[i] = parseFloat(argsArr[i]);
+		this.attribute.scale[i] *= parseFloat(argsArr[i]);
 	};
 
-	this.attribute.scale = argsArr;
-	this.attribute.translate[1] += argsArr[1];
+	// this.attribute.scale = argsArr;
+	this.attribute.translate[1] += (this.isRoot || parseFloat(argsArr[1]) != 1.0) ?  this.attribute.scale[1] : 0;
 };
 
 /**
  * Identity function
- * @param {String} args Identity name
+ * @param {String} args			"identityName"
  */
 clsNode.prototype.I = function(args) {
 	var f = null;
@@ -479,7 +455,7 @@ clsNode.prototype.I = function(args) {
 
 /**
  * Model function
- * @param {String} args Model name
+ * @param {String} args			"modelName"
  */
 clsNode.prototype.M = function(args) {
 	var f = null;
@@ -496,8 +472,8 @@ clsNode.prototype.M = function(args) {
 
 /**
  * Sub-divide function
- * @param {String} args  Axis and divide arguments
- * @param {String} names Name of each part
+ * @param {String} args  		Axis and divide arguments
+ * @param {String} names 		Name of each part
  */
 clsNode.prototype.Subdiv = function(args, names) {
 	if (this.isModel != undefined && this.isModel) {
@@ -531,8 +507,8 @@ clsNode.prototype.Subdiv = function(args, names) {
 
 /**
  * Get axis number
- * @param  {Char} a Axis name
- * @return {Int}   Axis number
+ * @param  {Char} a 		Axis name
+ * @return {Int}   			Axis number
  */
 function getAxis(a) {
 	if (a == 'X' || a == 'x') return 0;
@@ -546,14 +522,19 @@ function getAxis(a) {
 
 /**
  * Get variable's type
- * @param  {Any} a Variable
- * @return {String}   a's type
+ * @param  {Any} a 			Variable
+ * @return {String}   		a's type
  */
 function getTypeof(a) {
 	var r = a.constructor.toString().match(/function\s(\w+)\(\).+/);
 	return r[1];
 }
 
+/**
+ * Get texture's attribute of scale
+ * @param  {Array} scale 	Array of entity's scale
+ * @return {Object}			Object of texture's scale
+ */
 function getTextureScale(scale) {
 	if (scale[2] <= 1) {
 		return {
@@ -578,6 +559,11 @@ function getTextureScale(scale) {
 	}
 }
 
+/**
+ * Get texture's attribute of translate
+ * @param  {Array} translate 	Array of entity's translate
+ * @return {Object}				Object of texture's translate
+ */
 function getTextureTranslate(translate) {
 	return {
 		x: translate[0],
@@ -586,39 +572,32 @@ function getTextureTranslate(translate) {
 	};
 }
 
+/**
+ * Load scripts dynamically
+ * @param  {String}   url 			Script's url
+ * @param  {Function} callback		Function to be executed after script is loaded
+ */
 function loadScript(url, callback) {
 	var script = document.createElement("Script");
 	script.type = "text/javascript";
 
-	//IE 验证脚本是否下载完成
-	if (script.readyState) {
+	if (script.readyState) {	// For IE
 		script.onreadystatechange = function() {
-			//readyState属性有5种取值
-			//uninitialized：初始状态
-			//loading：开始下载
-			//interactive：数据完成下载但尚不可用
-			//complete：数据已经准备就绪
-			//实际使用时，readyState的值并不像我们预想的那样有规律，实践发现使用readyState
-			//最靠谱的方式是同时检查以下2个状态，只要其中1个触发，就认为脚本下载完成。
 			if (script.readyState == "loaded" || script.readyState == "complete") {
-				//移除事件处理器，确保事件不会处理2次
 				script.onreadystatechange = null;
 				callback();
 			}
 		}
 	}
-
-	//其他浏览器
-	else {
+	else {	// For others
 		script.onload = function() {
 			callback();
 		};
 	}
 
 	script.src = url;
-	//把新建的<Script>添加到<head>里比添加到<body>里更保险。
 	document.getElementsByTagName("head")[0].appendChild(script);
-	}
+}
 
 /**
  * Clone array

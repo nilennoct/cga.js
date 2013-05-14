@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>CGA.test()</title>
+	<script type="text/javascript" src="../CGA.js"></script>
+	<script type="text/javascript" src="../scenejs.js"></script>
+</head>
+<body>
+	<canvas id="theCanvas" width="640" height="640">
+		<p>This example requires a browser that supports the
+			<a href="http://www.w3.org/html/wg/html5/">HTML5</a>
+			&lt;canvas&gt; feature.</p>
+	</canvas>
+
+	<script type="text/javascript">
+		var cga = new clsCGA("theScene", "theCanvas");
+		cga.setModelSrc('models/');
+
+		cga.addRule('1', '', '', 'S(1,2,1) I(cube){root} S(1,2,1) R(y,45) I(cube){root} S(0.3,3,0.3) I(disk){axis}','');
+		cga.addRule('2', 'root', '', 'Subdiv(Y,1,2,3,2,1){small | medium | big0 | medium | small}', '');
+		// cga.addRule('21', 'medium', '', 'I(nil)', '');
+		// cga.addRule('22', 'big', '', 'I(nil)', '');
+		// cga.addRule('23', 'small', '', 'I(nil)', '');
+		cga.addRule('3', 'small', '', 'S(0.67,1,0.67) Text(water,1)', '');
+		cga.addRule('41', 'big0', '', 'S(1.5,1,1.5) Subdiv(Y,2,1,2){big | disk | big}', '');
+		cga.addRule('4', 'big', '', 'Text(water,1)', '');
+		cga.addRule('5', 'medium', '', 'R(y,22.5)', '');
+		cga.addRule('6', 'disk', '', 'S(2,1,2) I(disk) Text(wood,1)', '');
+
+		cga.buildScene();
+
+		var scene = cga.scene;
+		var yawNode = scene.findNode("yaw");
+		var pitchNode = scene.findNode("mainTranslate");
+
+		var lastX;
+		var lastY;
+		var dragging = false;
+
+		var newInput = false;
+		var yaw = 0;
+		var pitch = 0;
+
+
+		var canvas = document.getElementById("theCanvas");
+
+		function mouseDown(event) {
+		    lastX = event.clientX;
+		    lastY = event.clientY;
+		    dragging = true;
+		}
+
+		function touchStart(event) {
+		    lastX = event.targetTouches[0].clientX;
+		    lastY = event.targetTouches[0].clientY;
+		    dragging = true;
+		}
+
+		function mouseUp() {
+		    dragging = false;
+		}
+
+		function touchEnd() {
+		    dragging = false;
+		}
+
+		function mouseMove(event) {
+		    var posX = event.clientX;
+		    var posY = event.clientY;
+		    actionMove(posX,posY);
+		}
+
+		function touchMove(event) {
+		    var posX = event.targetTouches[0].clientX;
+		    var posY = event.targetTouches[0].clientY;
+		    actionMove(posX,posY);
+		}
+
+		function actionMove(posX, posY) {
+		    if (dragging) {
+
+		        yaw += (posX - lastX) * 0.5;
+		        pitch -= (posY - lastY) * 0.03;
+
+		        lastX = posX;
+		        lastY = posY;
+
+		        newInput = true;
+
+		    }
+		}
+
+		canvas.addEventListener('mousedown', mouseDown, true);
+		canvas.addEventListener('mousemove', mouseMove, true);
+		canvas.addEventListener('mouseup', mouseUp, true);
+		canvas.addEventListener('touchstart', touchStart, true);
+		canvas.addEventListener('touchmove', touchMove, true);
+		canvas.addEventListener('touchend', touchEnd, true);
+
+		setTimeout(function() {
+			cga.renderScene({
+				idleFunc: function() {
+					if (newInput) {
+						yawNode.set("angle", yaw);
+						pitchNode.set("y", pitch);
+						newInput = false;
+					}
+				}
+			});
+		}, 2000);
+	</script>
+</body>
+</html>
