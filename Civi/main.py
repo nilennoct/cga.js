@@ -42,6 +42,7 @@ def getUserId(username):
     entries = [dict(id = row[0],name = row[1],pwd = row[2]) for row in cur.fetchall()]
     return entries[0]['id']
 
+
 def getUserName(uid):
     cur = g.db.execute('select * from users where id == ?',[uid])
     entries = [dict(id = row[0],username = row[1],pwd = row[2]) for row in cur.fetchall()]
@@ -89,8 +90,9 @@ def webgl():
         return render_template('login.html')
     else:
         uid = request.args.get('uid', type=int) or getUserId(username)
-        uname = getUserName(uid)
-        cur = g.db.execute('select id,title,text from entries where userId == ? order by id desc limit 0, 1', [uid])
+		uname = getUserName(uid)
+
+		cur = g.db.execute('select id,title,text from entries where userId == ? order by id desc limit 0, 1', [uid])
         entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
         if len(entries) == 0:
             entries = [dict(id = 0, title = "-", text = "[No Entry>_<]")]
@@ -164,6 +166,7 @@ def init():
     flash("Initialize Successfully!")
     return render_template('welcome.html')
 
+
 @app.route('/friends')
 def friends():
     username = session['User']
@@ -221,7 +224,6 @@ def deleteFriends():
     g.db.commit()
     flash('Friends deleted!')
     return redirect(url_for('friends'))
-
 
 @app.route('/destroy')
 def destroy():

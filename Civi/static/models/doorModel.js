@@ -33,15 +33,16 @@ var doorModel = {
                             b: 0.5,
                             g: 0.5,
                         },
-                    nodes:                         {
+                    nodes: [                         {
                             type: 'texture',
                             layers: [
                                 {
-                                    url: $SCRIPT_ROOT + '/static/models/internaldoor/Metal_Corrogated_Shiny_.jpg',
+                                    uri: $SCRIPT_ROOT + '/static/models/internaldoor/Metal_Corrogated_Shiny_.jpg',
                                     applyTo: 'baseColor',
                                 },
                             ],
                         },
+                    ]
                 },
                 {
                     type: 'geometry',
@@ -192,19 +193,8 @@ var doorModel = {
             ],
         },
         {
-            type: 'renderer',
-            clear:
-                {
-                    color: true,
-                    depth: true,
-                    stencil: false,
-                },
-            // clearColor:
-            //     {
-            //         r: 0.9,
-            //         b: 0.9,
-            //         g: 0.9,
-            //     },
+            type: 'matrix',
+            elements: [1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,],
             nodes: [
                 {
                     type: 'matrix',
@@ -215,188 +205,182 @@ var doorModel = {
                             elements: [1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,],
                             nodes: [
                                 {
-                                    type: 'matrix',
-                                    elements: [1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,],
+                                    type: 'geometry',
+                                    coreId: 'ID4',
                                     nodes: [
                                         {
-                                            type: 'geometry',
-                                            coreId: 'ID4',
+                                            type: 'material',
+                                            coreId: 'ID5',
                                             nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID5',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID40',
-                                                        },
-                                                    ],
-                                                },
-                                                {
-                                                    type: 'material',
-                                                    coreId: 'ID10',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID41',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID40',
                                                 },
                                             ],
                                         },
                                         {
-                                            type: 'geometry',
-                                            coreId: 'ID14',
+                                            type: 'material',
+                                            coreId: 'ID10',
                                             nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID10',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID140',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID41',
                                                 },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'geometry',
+                                    coreId: 'ID14',
+                                    nodes: [
+                                        {
+                                            type: 'material',
+                                            coreId: 'ID10',
+                                            nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID15',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID141',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID140',
                                                 },
                                             ],
                                         },
                                         {
-                                            type: 'geometry',
-                                            coreId: 'ID27',
+                                            type: 'material',
+                                            coreId: 'ID15',
                                             nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID10',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID270',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID141',
                                                 },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'geometry',
+                                    coreId: 'ID27',
+                                    nodes: [
+                                        {
+                                            type: 'material',
+                                            coreId: 'ID10',
+                                            nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID15',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID271',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID270',
                                                 },
                                             ],
                                         },
                                         {
-                                            type: 'geometry',
-                                            coreId: 'ID35',
+                                            type: 'material',
+                                            coreId: 'ID15',
                                             nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID10',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID350',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID271',
                                                 },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'geometry',
+                                    coreId: 'ID35',
+                                    nodes: [
+                                        {
+                                            type: 'material',
+                                            coreId: 'ID10',
+                                            nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID15',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID351',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID350',
                                                 },
                                             ],
                                         },
                                         {
-                                            type: 'geometry',
-                                            coreId: 'ID43',
+                                            type: 'material',
+                                            coreId: 'ID15',
                                             nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID10',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID430',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID351',
                                                 },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'geometry',
+                                    coreId: 'ID43',
+                                    nodes: [
+                                        {
+                                            type: 'material',
+                                            coreId: 'ID10',
+                                            nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID15',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID431',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID430',
                                                 },
                                             ],
                                         },
                                         {
-                                            type: 'geometry',
-                                            coreId: 'ID51',
+                                            type: 'material',
+                                            coreId: 'ID15',
                                             nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID10',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID510',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID431',
                                                 },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'geometry',
+                                    coreId: 'ID51',
+                                    nodes: [
+                                        {
+                                            type: 'material',
+                                            coreId: 'ID10',
+                                            nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID15',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID511',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID510',
                                                 },
                                             ],
                                         },
                                         {
-                                            type: 'geometry',
-                                            coreId: 'ID59',
+                                            type: 'material',
+                                            coreId: 'ID15',
                                             nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID10',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID590',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID511',
                                                 },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'geometry',
+                                    coreId: 'ID59',
+                                    nodes: [
+                                        {
+                                            type: 'material',
+                                            coreId: 'ID10',
+                                            nodes: [
                                                 {
-                                                    type: 'material',
-                                                    coreId: 'ID15',
-                                                    nodes: [
-                                                        {
-                                                            type: 'geometry',
-                                                            coreId: 'ID591',
-                                                        },
-                                                    ],
+                                                    type: 'geometry',
+                                                    coreId: 'ID590',
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: 'material',
+                                            coreId: 'ID15',
+                                            nodes: [
+                                                {
+                                                    type: 'geometry',
+                                                    coreId: 'ID591',
                                                 },
                                             ],
                                         },
@@ -407,6 +391,6 @@ var doorModel = {
                     ],
                 },
             ],
-        }
+        },
     ]
 }
