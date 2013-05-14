@@ -1,0 +1,48 @@
+friends.html{% extends "layout.html" %}
+{% block body %}
+<script>
+	function addFriends($entryId)
+	{
+		$.post("{{ url_for('add_friend') }}",{entryId:$entryId},function(data){
+			location.href="{{ url_for('friends') }}";
+		});
+	}
+	
+	function deleteFriends($entryId)
+	{
+		$.post("{{ url_for('deleteFriends') }}",{entryId:$entryId},function(data){
+			location.href="{{ url_for('friends') }}";
+		});
+	}
+</script>
+
+{% if session.User != None %}
+	<h2>Search Results</h2>
+	<ul class=entries>
+  	{% for entry in entries %}
+	<li>
+	<div style = "margin-left:0px;">   
+    	<div witdh=100px>
+    	<img src = {{ url_for('static', filename='icon.jpg') }} width="50" style="float:left; margin-right:5px" >
+    	<div style="margin-left:5px;">
+    		<p style="color:#12aa12">Id:{{ entry.id }}</p>
+    		<p style="color:#12bb12">Name:{{ entry.name }}</p>
+		</div>
+		</div>
+		<div style="margin-top:5px;">
+		{% if entry.rela == 0 %}
+		
+		<a href="#" id="addFriends" class="btn btn-success" onclick="addFriends({{ entry.id }})">加为好友</a>
+
+		{% else %}
+	
+		<a href="#" id="deleteFriends" class="btn btn-danger" onclick="deleteFriends({{ entry.id }})">删除好友</a>
+		</div> 
+		{% endif %} 	
+  	</div>
+  	{% else %}
+    <li><em>No friends here so far</em>
+  	{% endfor %}
+  	</ul>
+  	{% endif %}
+{% endblock %}

@@ -1,0 +1,23 @@
+friends.html{% extends "layout.html" %}
+{% block body %}
+<script>
+	function deleteEntry($entryId)
+	{
+		$.post("{{ url_for('deleteEntry') }}",{entryId:$entryId},function(data){
+			location.href="{{ url_for('show_entries') }}";
+		});
+	}
+</script>
+<div class ="homepage">
+<img src = {{ url_for('static', filename='icon.jpg') }} width="100" style="float:left; margin-right:5px">
+<h2 style = "margin-left:20px;">This is the homepage of {{ username }}</h2>  
+</div>
+<h3>His Sharing:</h3>
+<ul class=entries>
+  {% for entry in entries %}
+    <li><h3>{{ entry.title }}</h3>{{ entry.text|safe }}
+  {% else %}
+    <li><em>No entries here so far</em>
+  {% endfor %}
+</ul>
+{% endblock %}

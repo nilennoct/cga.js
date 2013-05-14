@@ -12,3 +12,9 @@ create table users(
 	username string not null,
 	userpassword string not null 
 );
+
+drop table if exists friends;
+create table friends(
+	user1 integer not null,
+	user2 integer not null
+);

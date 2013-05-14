@@ -269,41 +269,20 @@ function handleNode(rule, node) {
  * @param  {SceneNode} sceneNode Parent scene node, where a new child node will be inserted
  * @param  {String} index     Used to void id clash
  */
-function insertNode(scene, node, sceneNode, index, pAttribute) {
+function insertNode(scene, node, sceneNode, index) {
 	var newSceneNode = (node.isModel != undefined) && (node.isModel == true) ?
-		eval(node.entity) : {
+		node.entity : {
 			id: node.name + '_' + index,
 			type: node.entity,
 			nodes: []
 		};
 
-	var cScale = node.attribute.scale.clone();
-	var cTranslate = node.attribute.translate.clone();
-	if (node.attribute.fill && pAttribute != undefined) {
-		for (var i = 0; i < 3; i++) {
-			if (pAttribute.scale[i] != 1.0 && cScale[i] == 1.0) {
-				cScale[i] = pAttribute.scale[i];
-			}
-
-			// if (pAttribute.translate[i] != 0.0 && cTranslate[i] == 0.0) {
-			cTranslate[i] += pAttribute.translate[i];
-			// }
-		};
-	}
-
-	// console.log(node.name);
-	// console.log(node.attribute.translate);
-	// console.log(node.attribute.scale);
-
 	if (node.attribute.texture != null) {
+		// var tmpSceneNode = newSceneNode;
+		// newSceneNode = eval(node.attribute.texture);
 		node.attribute.texture.nodes[0].nodes.push(newSceneNode);
 		newSceneNode = node.attribute.texture;
-		if (node.attribute.fill) {
-			newSceneNode.nodes[0].layers[0].scale = getTextureScale(cScale);
-			newSceneNode.nodes[0].layers[0].translate = getTextureTranslate(cTranslate);
-		}
-		// console.log(newSceneNode.nodes[0].layers[0].translate);
-		// console.log(newSceneNode.nodes[0].layers[0].scale);
+		newSceneNode.nodes[0].layers[0].scale = getTextureScale(node.attribute.scale);
 	}
 
 	if (node.attribute.scale.toString() != [1, 1, 1].toString()) {
@@ -348,7 +327,7 @@ function insertNode(scene, node, sceneNode, index, pAttribute) {
 	if (node.children.length > 0) {
 		var lastNode = scene.findNode(node.name + '_' + index);
 		node.children.forEach(function(e, i) {
-			insertNode(scene, e, lastNode, index + '_' + i, {'scale': cScale, 'translate': cTranslate});
+			insertNode(scene, e, lastNode, index + '_' + i);
 		});
 	}
 }
@@ -443,11 +422,9 @@ clsNode.prototype.R = function(args) {
 
 clsNode.prototype.Text = function(args) {
 	var that = this;
-	var argsArr = args.split(/\s*,\s*/);
 
-	loadScript(MODELSRC + argsArr[0] + 'Texture.js', function() {
-		that.attribute.texture = eval(argsArr[0] + 'Texture');
-		that.attribute.fill = parseInt(argsArr[1]);
+	loadScript(MODELSRC + args + '.js', function() {
+		that.attribute.texture = eval(args);
 	});
 }
 
@@ -488,8 +465,8 @@ clsNode.prototype.M = function(args) {
 		this[f[0]](f[1]);
 	}
 
-	loadScript(MODELSRC + args + 'Model.js', function() {
-		that.entity = args + 'Model'; // eval(args);
+	loadScript(MODELSRC + args + '.js', function() {
+		that.entity = eval(args);
 		that.isModel = true;
 	});
 }
@@ -576,14 +553,6 @@ function getTextureScale(scale) {
 			z: 1
 		};
 	}
-}
-
-function getTextureTranslate(translate) {
-	return {
-		x: translate[0],
-		y: translate[1],
-		z: translate[2]
-	};
 }
 
 function loadScript(url, callback) {

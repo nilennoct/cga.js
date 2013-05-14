@@ -1,12 +1,11 @@
 body            { font-family: sans-serif; background: #eee;}
 a, h1, h2       { color: #377BA8; }
-a, a:hover		{text-decoration: none;}
 h1, h2          { font-family: 'Georgia', serif; margin: 0; }
 h1              { border-bottom: 2px solid #eee; }
 h2              { font-size: 1.2em; }
 
 .page           { margin: 0 auto; width: 730px; border: 5px solid #ad9b85;
-                  padding: 30px; background: white; margin-top:60px;position: relative;}
+                  padding: 30px; background: white; margin-top:40px;}
 .entries        { list-style: none; margin: 0; padding: 0; }
 .entries li     { margin: 0.8em 1.2em; }
 .entries li h2  { margin-left: -1em; }
@@ -18,70 +17,5 @@ h2              { font-size: 1.2em; }
                   border: 1px solid #AACBE2; }
 .error          { background: #F0D6D6; padding: 0.5em; }
 
-.clearfix {
-	clear: both;
-	display: block;
-}
+.homepage 		{width: 700px; height: 150px; padding: 10px; background-color: #eee}
 
-#userLabel {
-	position: absolute;
-	top: 70px;
-	left:0;
-	font-size: 16px;
-	color: #fff;
-	z-index: 999px;
-	padding: 10px;
-	-webkit-border-radius: 8px 0 0 8px;
-	-moz-border-radius: 8px 0 0 8px;
-	border-radius: 8px 0 0 8px;
-	margin-left: -120px;
-	width: 100px;
-	text-align: right;
-	background:rgb(173, 155, 133);
-}
-
-#sceneBox {
-	position: relative;
-	overflow: hidden;
-	float: left;
-}
-#statusBox {
-	width: 200px;
-	font-size: 14px;
-	background-color: #f0f0f0;
-	border: 1px solid #ccc;
-	z-index: 999;
-	-webkit-border-radius: 8px;
-	-moz-border-radius: 8px;
-	border-radius: 8px;
-	padding: 5px 10px;
-	position: absolute;
-	top: 280px;
-	left: 375px;
-}
-#statusControl {
-	margin-top: 10px;
-	float: right;
-}
-#statusControl li {
-	display: inline;
-}
-#statusControl a {
-	background: #e8e8e8;
-	border: 1px solid #ccc;
-	padding: 2px;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-}
-#statusControl a:hover {
-	background-color: #f0f0f0;
-	-webkit-box-shadow: 0 1px 2px rgb(0, 85, 128);
-	-moz-box-shadow: 0 1px 2px rgb(0, 85, 128);
-	box-shadow: 0 1px 2px rgb(0, 85, 128);
-}
-#statusControl a:last-child {
-	margin-left: 2px;
-	padding-left: 2px;
-	border-left: 1px dotted #ccc;
-}

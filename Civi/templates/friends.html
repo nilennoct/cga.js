@@ -1,0 +1,36 @@
+friends.html{% extends "layout.html" %}
+{% block body %}
+<script>
+	function deleteFriends($entryId)
+	{
+		$.post("{{ url_for('deleteFriends') }}",{entryId:$entryId},function(data){
+			location.href="{{ url_for('friends') }}";
+		});
+	}
+</script>
+	<form action="{{ url_for('search') }}" method=post class="navbar-form pull-left">
+  		<input type=text class="span2" name=searchname style="height:28px; width:200px">
+  		<input type=submit value=搜索好友 class="btn">
+	</form>
+	<br></br>
+	<p style="margin-left:18px"><em>Your Friends:</em></p>
+  	<ul class=entries>
+  	{% for entry in friends %}
+	<li>
+		<div style = "float:clean">   
+    	<div witdh=150px>
+    	<a href="{{ url_for('homepage', id = entry.userid) }}"><img src = {{ url_for('static', filename='icon.jpg') }} width="50" style="float:left; margin-right:5px"></a>
+    	<div style="margin-left:5px">
+    		<p style="color:#12aa12">Id:{{ entry.userid }}</p>
+    		<p style="color:#12bb12">Name:{{ entry.username }}</p>
+		</div>
+		</div>
+		<div style="margin-top:5px;">
+		<a href="#" id="deleteFriends" class="btn btn-danger" onclick="deleteFriends({{ entry.userid }})">解除好友</a>
+		</div>  	
+  	</div>
+  	{% else %}
+    <li><em>No Friends here so far</em>
+  	{% endfor %}
+  	</ul>
+{% endblock %}
