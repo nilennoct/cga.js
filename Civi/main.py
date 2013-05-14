@@ -42,10 +42,21 @@ def getUserId(username):
     entries = [dict(id = row[0],name = row[1],pwd = row[2]) for row in cur.fetchall()]
     return entries[0]['id']
 
-def getUsername(uid):
+
+def getUserName(uid):
     cur = g.db.execute('select * from users where id == ?',[uid])
     entries = [dict(id = row[0],username = row[1],pwd = row[2]) for row in cur.fetchall()]
     return entries[0]['username']
+
+def checkFriends(userId):
+    username = session['User']
+    uid = getUserId(username)
+    cur = g.db.execute('select * from friends where (user1 = ? and user2 = ?) or (user1 = ? and user2 = ?)',[userId,uid,uid,userId])
+    entries = [dict(id = row[0],name = row[1]) for row in cur.fetchall()]
+    if len(entries) > 0:
+        return 1
+    else:
+        return 0
 
 @app.before_request
 def before_request():
@@ -79,12 +90,22 @@ def webgl():
         return render_template('login.html')
     else:
         uid = request.args.get('uid', type=int) or getUserId(username)
-        uname = getUsername(uid)
-        cur = g.db.execute('select id,title,text from entries where userId == ? order by id desc limit 0, 1', [uid])
+		uname = getUserName(uid)
+
+		cur = g.db.execute('select id,title,text from entries where userId == ? order by id desc limit 0, 1', [uid])
         entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
         if len(entries) == 0:
             entries = [dict(id = 0, title = "-", text = "[No Entry>_<]")]
         return render_template('3d.html', entry=entries[0], uid=uid, username=uname)
+
+@app.route('/homepage',methods = ['GET'])
+def homepage():
+    uid = request.args.get('id',type = int)
+    username = getUserName(uid)
+    cur = g.db.execute('select id,title,text from entries where userId = ? order by id desc',[uid])
+    entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
+    return render_template('homepage.html',uid = uid, username = username,entries = entries)
+
 
 @app.route('/getEntries', methods = ['GET'])
 def get_entries():
@@ -144,6 +165,65 @@ def init():
     session['User'] = False
     flash("Initialize Successfully!")
     return render_template('welcome.html')
+
+
+@app.route('/friends')
+def friends():
+    username = session['User']
+    if username == None:
+        return render_template('welcome.html')
+    else:
+        uid = getUserId(username)
+        cur = g.db.execute('select * from friends where user1 = ? or user2 = ?',[uid,uid])
+        entries = [dict(user1 = row[0], user2 = row[1]) for row in cur.fetchall()]
+        fries = []
+        allfriends = []
+        for i in range(len(entries)):
+            if (entries[i]['user1'] == uid):
+                fries.append(entries[i]['user2'])
+            elif (entries[i]['user2'] == uid):
+                fries.append(entries[i]['user1'])
+
+        for i in range(len(fries)):
+            tmpname = getUserName(fries[i]);
+            single = dict(userid = fries[i], username = tmpname)
+            allfriends.append(single)
+        return render_template("friends.html",friends = allfriends)
+
+@app.route('/search',methods=['POST'])
+def search():
+    username = session['User']
+    searchName = request.form["searchname"]
+    if searchName == "":
+        cur = g.db.execute("select * from users")
+    else:
+        cur = g.db.execute("select * from users where username = ?",[searchName])
+        
+    entries = [dict(id = row[0],name = row[1],pwd = row[2]) for row in cur.fetchall()]
+    results = []
+    for i in range(len(entries)):
+        if entries[i]['name'] != username:
+            results.append(dict(id = entries[i]['id'], name = entries[i]['name'], rela = checkFriends(entries[i]['id'])))
+    return render_template('search_results.html',entries = results)
+
+@app.route('/add_friend',methods=['POST'])
+def add_friend():
+    username = session['User']
+    uid = getUserId(username)
+    g.db.execute('insert into friends(user1,user2) values(?,?)',[request.form['entryId'],uid])
+    g.db.commit()
+    flash('New friends added!')
+    return redirect(url_for('friends'))
+
+@app.route('/deleteFriends',methods=['POST'])
+def deleteFriends():
+    username = session['User']
+    aid = getUserId(username)
+    bid = request.form['entryId']
+    g.db.execute('delete from friends where (user1 = ? and user2 = ?) or (user1 = ? and user2 = ?)',[aid,bid,bid,aid])
+    g.db.commit()
+    flash('Friends deleted!')
+    return redirect(url_for('friends'))
 
 @app.route('/destroy')
 def destroy():
