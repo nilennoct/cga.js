@@ -9,11 +9,11 @@
 	}
 </script>
 	<form action="{{ url_for('search') }}" method=post class="navbar-form pull-left">
-  		<input type=text class="span2" name=searchname style="height:28px; width:200px">
+  		<input type=text class="span2" name=searchname style="height:20px; width:200px">
   		<input type=submit value=搜索好友 class="btn">
 	</form>
 	<br></br>
-	<p style="margin-left:18px"><em>Your Friends:</em></p>
+	<p style="margin-left:18px"><h2><em>Your Friends:</em></h2></p>
   	<ul class=entries>
   	{% for entry in friends %}
 	<li>

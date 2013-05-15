@@ -100,11 +100,16 @@ def webgl():
 
 @app.route('/homepage',methods = ['GET'])
 def homepage():
-    uid = request.args.get('id',type = int)
-    username = getUserName(uid)
-    cur = g.db.execute('select id,title,text from entries where userId = ? order by id desc',[uid])
-    entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
-    return render_template('homepage.html',uid = uid, username = username,entries = entries)
+    username = session.get('User')
+    if username != None:
+        uid = request.args.get('id',type = int)
+        username = getUserName(uid)
+        cur = g.db.execute('select id,title,text from entries where userId = ? order by id desc',[uid])
+        entries = [dict(id = row[0],title = row[1],text = row[2]) for row in cur.fetchall()]
+        return render_template('homepage.html',uid = uid, username = username,entries = entries)
+    else:
+        flash('Please log in first!')
+        return render_template('login.html')
 
 
 @app.route('/getEntries', methods = ['GET'])
@@ -146,18 +151,21 @@ def get_entry():
 
 @app.route('/add',methods=['POST'])
 def add_entry():
-    username = session['User']
+    username = session.get('User')
     if username != None:
         uid = getUserId(username)
         title = request.form['title']
         text = request.form['text']
-    if (title == '' or text == ''):
-        flash('Content should not be empty!')
+        if (title == '' or text == ''):
+            flash('Content should not be empty!')
+        else:
+            g.db.execute('insert into entries(userId,title,text) values (?,?,?)',[uid,title,text])
+            g.db.commit()
+            flash('New entry was successfully posted')
+        return redirect(url_for('show_entries'))
     else:
-        g.db.execute('insert into entries(userId,title,text) values (?,?,?)',[uid,title,text])
-        g.db.commit()
-        flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
+        flash('Please log in first!')
+        return render_template('login.html')
 
 @app.route('/init')
 def init():
@@ -169,9 +177,10 @@ def init():
 
 @app.route('/friends')
 def friends():
-    username = session['User']
+    username = session.get('User')
     if username == None:
-        return render_template('welcome.html')
+        flash('Please log in first!')
+        return render_template('login.html')
     else:
         uid = getUserId(username)
         cur = g.db.execute('select * from friends where user1 = ? or user2 = ?',[uid,uid])
